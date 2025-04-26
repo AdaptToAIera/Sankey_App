@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sankey Graph Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Sankey Graph Generator</h1>
+
+        <section id="upload-section" class="card">
+            <h2>1. Nahrať Dáta</h2>
+            <input type="file" id="fileInput" accept=".csv, .xlsx">
+            <div id="uploadStatus"></div>
+        </section>
+
+        <section id="data-section" class="card" style="display: none;">
+            <h2>2. Dáta a Mapovanie Stĺpcov</h2>
+            <div id="columnMapping">
+                <h3>Mapovať stĺpce pre Sankey graf:</h3>
+                <label for="sourceColumnSelect">Zdroj (Source):</label>
+                <select id="sourceColumnSelect"></select>
+
+                <label for="targetColumnSelect">Cieľ (Target):</label>
+                <select id="targetColumnSelect"></select>
+
+                <label for="valueColumnSelect">Hodnota (Value):</label>
+                <select id="valueColumnSelect"></select>
+            </div>
+            <div id="dataTableContainer">
+                <h3>Náčítané dáta:</h3>
+                <table id="dataTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="settings-section" class="card" style="display: none;">
+            <h2>3. Nastavenia Grafu</h2>
+            <div id="graphSettings">
+                <div class="setting-group">
+                    <h3>Rozmery a Layout</h3>
+                    <div>
+                        <label for="graphWidthInput">Šírka grafu:</label>
+                        <input type="number" id="graphWidthInput" value="960" min="100"> px
+                    </div>
+                    <div>
+                        <label for="graphHeightInput">Výška grafu:</label>
+                        <input type="number" id="graphHeightInput" value="600" min="100"> px
+                    </div>
+                    <div>
+                        <label for="nodeWidthInput">Šírka uzlov:</label>
+                        <input type="number" id="nodeWidthInput" value="15" min="5"> px
+                    </div>
+                     <div>
+                        <label for="nodePaddingInput">Vertikálna medzera medzi uzlami:</label>
+                        <input type="number" id="nodePaddingInput" value="10" min="1"> px
+                    </div>
+                     </div>
+
+                 <div class="setting-group">
+                     <h3>Farby</h3>
+                     <div>
+                        <label for="nodeColorInput">Jednotná farba uzlov:</label>
+                        <input type="color" id="nodeColorInput" value="#4682B4"> </div>
+
+                     <div>
+                        <label for="linkColorModeSelect">Farbenie liniek:</label>
+                        <select id="linkColorModeSelect">
+                            <option value="solid">Jednotná farba</option>
+                            <option value="bySourceNode">Podľa zdrojového uzla</option>
+                             </select>
+                    </div>
+
+                     <div id="solidLinkColorDiv">
+                        <label for="solidLinkColorInput">Jednotná farba liniek:</label>
+                        <input type="color" id="solidLinkColorInput" value="#000000"> <label for="linkOpacityInput">Opacita liniek (0-1):</label>
+                         <input type="number" id="linkOpacityInput" value="0.5" min="0" max="1" step="0.05">
+                    </div>
+
+                     <div>
+                        <label for="colorNodesBySourceCheckbox">Farbiť uzly podľa farby zdrojovej linky:</label>
+                        <input type="checkbox" id="colorNodesBySourceCheckbox">
+                         <span style="font-size: 0.8em; color: #666;">(Funguje pri farbení liniek podľa zdroja)</span>
+                    </div>
+
+                     </div>
+
+                 <div class="setting-group">
+                     <h3>Popisky</h3>
+                     <div>
+                        <label for="showNodeLabelsCheckbox">Zobraziť popisky uzlov:</label>
+                        <input type="checkbox" id="showNodeLabelsCheckbox" checked>
+                    </div>
+                     <div>
+                        <label for="showNodeValuesCheckbox">Zobraziť hodnotu pri popisku:</label>
+                        <input type="checkbox" id="showNodeValuesCheckbox">
+                    </div>
+                 </div>
+
+                 <p style="font-size: 0.9em; color: #666;">Zmeny nastavení by sa mali prejaviť ihneď po zmene hodnoty.</p>
+
+            </div>
+        </section>
+
+        <section id="graph-section" class="card" style="display: none;">
+            <h2>4. Sankey Graf</h2>
+            <div id="sankeyGraphContainer">
+                 </div>
+        </section>
+
+        <section id="export-section" class="card" style="display: none;">
+            <h2>5. Export Grafu</h2>
+            <button id="exportSvgBtn">Export SVG</button>
+            <button id="exportPngBtn">Export PNG</button>
+            <button id="exportJpgBtn">Export JPG</button> 
+        </section>
+
+    </div>
+
+    <script src="libs/xlsx.full.min.js"></script>
+    <script src="libs/d3.min.js"></script>
+    <script src="libs/d3-sankey.min.js"></script>
+    <script src="libs/FileSaver.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
