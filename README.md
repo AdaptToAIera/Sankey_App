@@ -18,7 +18,7 @@ A simple, standalone, client-side web application for generating interactive San
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/AdaptToAIera/Sankey_App_Gemini.git
+    git clone https://github.com/AdaptToAIera/Sankey_App.git
     ```
 2.  **Navigate to the project directory:**
     ```bash

@@ -1,10 +1,5 @@
-// script.js
-
-// Zabalenie celého kódu do DOMContentLoaded listenra
 document.addEventListener('DOMContentLoaded', () => {
-
     // --- Referencie na DOM elementy ---
-    // Získané až po načítaní DOM
     const fileInput = document.getElementById('fileInput');
     const uploadStatus = document.getElementById('uploadStatus');
     const dataSection = document.getElementById('data-section');
@@ -28,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeRowBtn = document.getElementById('removeRowBtn');
 
 
-    // --- Referencie na vstupy nastavení grafu ---
+    // --- Referencie na vstupy nastavení ---
     const graphWidthInput = document.getElementById('graphWidthInput');
     const graphHeightInput = document.getElementById('graphHeightInput');
     const nodeWidthInput = document.getElementById('nodeWidthInput');
@@ -47,13 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const labelFontFamilyInput = document.getElementById('labelFontFamilyInput');
     const labelColorInput = document.getElementById('labelColorInput');
 
-
     // --- Premenné stavu aplikácie ---
     let rawFileData = null; // Surové dáta (pole polí)
     const manualColumnHeaders = ['Source', 'Target', 'Value']; // Fixné hlavičky pre ručný mód
     let isManualInputMode = true; // Príznak, či sme v režime ručného zadávania
 
-    // Nastavenia grafu (defaultné hodnoty)
+    // Nastavenia grafu
     const graphSettings = {
         width: 960, height: 600, nodeWidth: 15, nodePadding: 10,
         nodeColor: '#4682B4', linkColorMode: 'solid', solidLinkColor: '#000000', linkOpacity: 0.5,
@@ -62,132 +56,69 @@ document.addEventListener('DOMContentLoaded', () => {
     };
      let nodeColorScale = null; // D3 ordinálna škála pre farbenie uzlov/liniek podľa kategórie
 
-
-    // --- Definície Funkcií (všetky definované tu hore v rámci DOMContentLoaded) ---
+    // --- Definície Funkcií ---
 
     // Funkcia na inicializáciu UI nastavení s aktuálnymi hodnotami z graphSettings
     function initializeSettingsUI() {
-        // Kontrolujeme, či elementy existujú predtým, ako k nim pristupujeme
-        if (graphWidthInput) graphWidthInput.value = graphSettings.width;
-        if (graphHeightInput) graphHeightInput.value = graphSettings.height;
-        if (nodeWidthInput) nodeWidthInput.value = graphSettings.nodeWidth;
-        if (nodePaddingInput) nodePaddingInput.value = graphSettings.nodePadding;
-
-        if (nodeColorInput) nodeColorInput.value = graphSettings.nodeColor;
-        if (linkColorModeSelect) linkColorModeSelect.value = graphSettings.linkColorMode;
-        if (solidLinkColorInput) solidLinkColorInput.value = graphSettings.solidLinkColor;
-        if (linkOpacityInput) linkOpacityInput.value = graphSettings.linkOpacity;
-        if (showNodeLabelsCheckbox) showNodeLabelsCheckbox.checked = graphSettings.showNodeLabels;
-        if (showNodeValuesCheckbox) showNodeValuesCheckbox.checked = graphSettings.showNodeValues;
-        if (colorNodesBySourceCheckbox) colorNodesBySourceCheckbox.checked = graphSettings.colorNodesBySource;
-
-        if (labelFontSizeInput) labelFontSizeInput.value = graphSettings.labelFontSize;
-        if (labelFontFamilyInput) labelFontFamilyInput.value = graphSettings.labelFontFamily;
-        if (labelColorInput) labelColorInput.value = graphSettings.labelColor;
-
+        graphWidthInput.value = graphSettings.width;
+        graphHeightInput.value = graphSettings.height;
+        nodeWidthInput.value = graphSettings.nodeWidth;
+        nodePaddingInput.value = graphSettings.nodePadding;
+        nodeColorInput.value = graphSettings.nodeColor;
+        linkColorModeSelect.value = graphSettings.linkColorMode;
+        solidLinkColorInput.value = graphSettings.solidLinkColor;
+        linkOpacityInput.value = graphSettings.linkOpacity;
+        showNodeLabelsCheckbox.checked = graphSettings.showNodeLabels;
+        showNodeValuesCheckbox.checked = graphSettings.showNodeValues;
+        colorNodesBySourceCheckbox.checked = graphSettings.colorNodesBySource;
+        labelFontSizeInput.value = graphSettings.labelFontSize;
+        labelFontFamilyInput.value = graphSettings.labelFontFamily;
+        labelColorInput.value = graphSettings.labelColor;
         updateLinkColorUI(); // Inicializovať aj zobrazenie UI farieb (skrytie/zobrazenie inputu)
     }
 
-     // Handler pre zmenu nastavení TÝKAJÚCICH SA LEN POPISKOV TEXTU
-     // Táto funkcia nevolá prepareSankeyDataAndDraw(), ale priamo updateGraph() na prekreslenie popiskov
-     // Použiť pre showNodeLabels, showNodeValues, labelFontSize, labelFontFamily, labelColor
-    function handleNodeLabelSettingChange() {
-        // Aktualizovať LEN nastavenia popiskov z UI
-        if (showNodeLabelsCheckbox) graphSettings.showNodeLabels = showNodeLabelsCheckbox.checked;
-        if (showNodeValuesCheckbox) graphSettings.showNodeValues = showNodeValuesCheckbox.checked;
-        if (labelFontSizeInput) graphSettings.labelFontSize = parseInt(labelFontSizeInput.value) || 10;
-        if (labelFontFamilyInput) graphSettings.labelFontFamily = labelFontFamilyInput.value || 'sans-serif';
-        if (labelColorInput) graphSettings.labelColor = labelColorInput.value || '#000000';
+    // Handler pre zmenu akéhokoľvek nastavenia grafu v UI
+    function handleSettingChange() {
+        // Aktualizovať objekt graphSettings na základe hodnôt z UI
+        graphSettings.width = parseInt(graphWidthInput.value) || 960;
+        graphSettings.height = parseInt(graphHeightInput.value) || 600;
+        graphSettings.nodeWidth = parseInt(nodeWidthInput.value) || 15;
+        graphSettings.nodePadding = parseInt(nodePaddingInput.value) || 10;
+        graphSettings.nodeColor = nodeColorInput.value;
+        graphSettings.linkColorMode = linkColorModeSelect.value;
+        graphSettings.solidLinkColor = solidLinkColorInput.value;
+        graphSettings.linkOpacity = Math.max(0, Math.min(1, parseFloat(linkOpacityInput.value) || 0.5));
+        graphSettings.showNodeLabels = showNodeLabelsCheckbox.checked;
+        graphSettings.showNodeValues = showNodeValuesCheckbox.checked;
+        graphSettings.colorNodesBySource = colorNodesBySourceCheckbox.checked;
+        graphSettings.labelFontSize = parseInt(labelFontSizeInput.value) || 10;
+        graphSettings.labelFontFamily = labelFontFamilyInput.value || 'sans-serif';
+        graphSettings.labelColor = labelColorInput.value || '#000000';
+        console.log("Nastavenia zmenené:", graphSettings);
+        updateLinkColorUI(); // Aktualizovať zobrazenie UI pre farbu linky
 
-        console.log("Nastavenia popiskov zmenené:", {
-             showNodeLabels: graphSettings.showNodeLabels,
-             showNodeValues: graphSettings.showNodeValues,
-             labelFontSize: graphSettings.labelFontSize,
-             labelFontFamily: graphSettings.labelFontFamily,
-             labelColor: graphSettings.labelColor
-        });
-
-         // Prekresliť graf s novými nastaveniami popiskov
-         // Ak sú už dáta pre graf pripravené (SVG element existuje)
-         if (sankeyGraphContainer && sankeyGraphContainer.querySelector('svg')) {
-             const svg = d3.select("#sankeyGraphContainer svg");
-             const labelsGroup = svg.select(".labels");
-
-             // Aktualizovať zobrazenie celej skupiny popiskov
-             labelsGroup.style("display", graphSettings.showNodeLabels ? "block" : "none");
-
-             if (graphSettings.showNodeLabels) {
-                 // Ak sú popisky zobrazené, aktualizovať štýly a text jednotlivých popiskov
-                 labelsGroup.selectAll("text")
-                           .attr("font-family", graphSettings.labelFontFamily)
-                           .attr("font-size", `${graphSettings.labelFontSize}px`)
-                           .attr("fill", graphSettings.labelColor)
-                           .text(d => { // Prepočítať text (hlavne ak sa zmenilo showNodeValues)
-                               let text = d.name;
-                               if (graphSettings.showNodeValues && d.value !== undefined) {
-                                   const formattedValue = Number.isInteger(d.value) ? d.value : d3.format(".1f")(d.value);
-                                   text += ` (${formattedValue})`;
-                               }
-                               return text;
-                           });
-             }
-         }
-    }
-
-
-    // Handler pre zmenu nastavení TÝKAJÚCICH SA LAYOUTU ALEBO FARIEB UZLOV/LINIEK (okrem popiskov)
-    // Táto funkcia volá prepareSankeyDataAndDraw() na prepočítanie layoutu a prekreslenie
-    // Použiť pre width, height, nodeWidth, nodePadding, nodeColor, linkColorMode, solidLinkColor, linkOpacity, colorNodesBySource
-    function handleLayoutOrColorSettingChange() {
-        // Aktualizovať nastavenia z UI (všetky okrem popiskov, tie rieši handleNodeLabelSettingChange)
-        if (graphWidthInput) graphSettings.width = parseInt(graphWidthInput.value) || 960;
-        if (graphHeightInput) graphSettings.height = parseInt(graphHeightInput.value) || 600;
-        if (nodeWidthInput) graphSettings.nodeWidth = parseInt(nodeWidthInput.value) || 15;
-        if (nodePaddingInput) graphSettings.nodePadding = parseInt(nodePaddingInput.value) || 10;
-
-        if (nodeColorInput) graphSettings.nodeColor = nodeColorInput.value;
-        if (linkColorModeSelect) graphSettings.linkColorMode = linkColorModeSelect.value;
-        if (solidLinkColorInput) graphSettings.solidLinkColor = solidLinkColorInput.value;
-        if (linkOpacityInput) graphSettings.linkOpacity = Math.max(0, Math.min(1, parseFloat(linkOpacityInput.value) || 0.5));
-        if (colorNodesBySourceCheckbox) graphSettings.colorNodesBySource = colorNodesBySourceCheckbox.checked;
-
-        console.log("Nastavenia layoutu/farieb zmenené:", {
-             width: graphSettings.width, height: graphSettings.height,
-             nodeWidth: graphSettings.nodeWidth, nodePadding: graphSettings.nodePadding,
-             nodeColor: graphSettings.nodeColor, linkColorMode: graphSettings.linkColorMode,
-             solidLinkColor: graphSettings.solidLinkColor, linkOpacity: graphSettings.linkOpacity,
-             colorNodesBySource: graphSettings.colorNodesBySource
-        });
-
-         updateLinkColorUI(); // Aktualizovať zobrazenie UI pre farbu linky
-
-         // Prekresliť graf s novými nastaveniami layoutu/farieb
-         // Vždy voláme prepareSankeyDataAndDraw, lebo zmena týchto nastavení môže ovplyvniť layout alebo farby uzlov/liniek
-         if (sourceColumnSelect && sourceColumnSelect.value !== "" && targetColumnSelect && targetColumnSelect.value !== "" && valueColumnSelect && valueColumnSelect.value !== "") {
+         // Prekresliť graf s novými nastaveniami
+         if (sourceColumnSelect.value !== "" && targetColumnSelect.value !== "" && valueColumnSelect.value !== "") {
              console.log("Zmena nastavení, prekresľujem graf.");
-             prepareSankeyDataAndDraw(); // Toto volá updateGraph
+             // Spustiť prípravu dát a prekreslenie
+             prepareSankeyDataAndDraw();
          }
     }
 
-
-     // Funkcia na zobrazenie/skrytie inputu pre jednotnú farbu linky a stav inputu jednotnej farby uzla
+    // Funkcia na zobrazenie/skrytie inputu pre jednotnú farbu linky a stav inputu jednotnej farby uzla
      function updateLinkColorUI() {
           if (graphSettings.linkColorMode === 'solid') {
-              if (solidLinkColorDiv) solidLinkColorDiv.style.display = 'flex'; // Použiť flex pre zarovnanie
+              solidLinkColorDiv.style.display = 'flex'; // Použiť flex pre zarovnanie
           } else {
-              if (solidLinkColorDiv) solidLinkColorDiv.style.display = 'none';
+              solidLinkColorDiv.style.display = 'none';
           }
           // Zablokovať/odblokovať input jednotnej farby uzla
           if (graphSettings.colorNodesBySource && graphSettings.linkColorMode === 'bySourceNode') {
-               if (nodeColorInput) {
-                   nodeColorInput.disabled = true;
-                   nodeColorInput.style.opacity = 0.5;
-               }
+               nodeColorInput.disabled = true;
+               nodeColorInput.style.opacity = 0.5;
           } else {
-              if (nodeColorInput) {
-                   nodeColorInput.disabled = false;
-                   nodeColorInput.style.opacity = 1;
-              }
+               nodeColorInput.disabled = false;
+               nodeColorInput.style.opacity = 1;
           }
      }
 
@@ -202,37 +133,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const headers = manualColumnHeaders; // Fixné hlavičky pre ručný mód
 
-        if (dataTable) renderDataTable(rawFileData, headers); // Vykresliť tabuľku
-        if (sourceColumnSelect) populateColumnSelects(headers); // Nastaviť selecty (automaticky na Source/Target/Value)
+        renderDataTable(rawFileData, headers); // Vykresliť tabuľku
+        populateColumnSelects(headers); // Nastaviť selecty (automaticky na Source/Target/Value)
 
-        if (addRowBtn) addRowBtn.style.display = 'inline-block';
-        if (removeRowBtn) removeRowBtn.style.display = 'inline-block';
+        addRowBtn.style.display = 'inline-block';
+        removeRowBtn.style.display = 'inline-block';
 
          // V ručnom režime sú stĺpce fixné, nastaviť selecty automaticky a zablokovať ich
-         if (sourceColumnSelect) sourceColumnSelect.value = 0;
-         if (targetColumnSelect) targetColumnSelect.value = 1;
-         if (valueColumnSelect) valueColumnSelect.value = 2;
-         if (sourceColumnSelect) sourceColumnSelect.disabled = true;
-         if (targetColumnSelect) targetColumnSelect.disabled = true;
-         if (valueColumnSelect) valueColumnSelect.disabled = true;
+         sourceColumnSelect.value = 0;
+         targetColumnSelect.value = 1;
+         valueColumnSelect.value = 2;
+         sourceColumnSelect.disabled = true;
+         targetColumnSelect.disabled = true;
+         valueColumnSelect.disabled = true;
 
 
-         if (fileInput) fileInput.value = null; // Vyčistiť input súboru
-         if (uploadStatus) {
-            uploadStatus.textContent = 'Data sa zadávajú ručne.';
-            uploadStatus.style.color = 'black';
-         }
+         fileInput.value = null; // Vyčistiť input súboru
+         uploadStatus.textContent = 'Data sa zadávajú ručne.';
+         uploadStatus.style.color = 'black';
 
          console.log("Tabuľka inicializovaná pre ručné zadávanie.");
     }
 
     // Handler pre nahrávanie súboru
     function handleFileSelect(event) {
-        console.log("handleFileSelect started."); // Log na začiatku funkcie
         const files = event.target.files;
         if (files.length === 0) {
-             console.log("No file selected."); // Log ak nie je vybraný súbor
-             // Pri zrušení výberu súboru voláme resetApplicationState, čo vráti do ručného módu
+             // Ak zruší výber súboru, vrátime sa do ručného režimu
              resetApplicationState();
             return;
         }
@@ -240,65 +167,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = files[0];
         const fileName = file.name;
         const fileExtension = fileName.split('.').pop().toLowerCase();
-        console.log(`File selected: ${fileName}, Extension: ${fileExtension}`);
 
-
-        if (uploadStatus) {
-           uploadStatus.textContent = `Nahrávam a spracovávam súbor: ${fileName}...`;
-           uploadStatus.style.color = 'black';
-        }
-
+        uploadStatus.textContent = `Nahrávam a spracovávam súbor: ${fileName}...`;
+        uploadStatus.style.color = 'black';
 
         if (fileExtension !== 'csv' && fileExtension !== 'xlsx') {
-            console.log("Unsupported file format.");
-            if (uploadStatus) {
-                uploadStatus.textContent = 'Nepodporovaný formát súboru. Prosím, nahrajte CSV alebo XLSX.';
-                uploadStatus.style.color = 'red';
-            }
-            if (fileInput) event.target.value = null; // Reset inputu súboru
+            uploadStatus.textContent = 'Nepodporovaný formát súboru. Prosím, nahrajte CSV alebo XLSX.';
+            uploadStatus.style.color = 'red';
+            event.target.value = null;
             resetApplicationState(); // Vráti do ručného módu po chybe
             return;
         }
 
-        // Kontrola, či je knižnica SheetJS načítaná pred pokusom o čítanie
-        if (typeof XLSX === 'undefined') {
-            console.error("SheetJS (XLSX) library is not loaded. Cannot process file.");
-            if (uploadStatus) {
-                 uploadStatus.textContent = 'Chyba: Knižnica SheetJS (XLSX) nie je načítaná. Súbor nemožno spracovať.';
-                 uploadStatus.style.color = 'red';
-            }
-             if (fileInput) event.target.value = null; // Reset inputu súboru
-            resetApplicationState(); // Vráti do ručného módu
-            return;
-        }
-
-
         const reader = new FileReader();
 
         reader.onload = function(e) {
-            console.log("FileReader onload triggered.");
             const data = e.target.result;
 
             try {
-                console.log("Attempting to read workbook.");
+                if (typeof XLSX === 'undefined') {
+                     throw new Error("Knihovna SheetJS (XLSX) není načtena.");
+                }
+
                 const workbook = XLSX.read(data, { type: 'array', cellText: false, cellDates: true });
-                console.log("Workbook read successfully.", workbook);
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
-                console.log("First sheet name:", firstSheetName);
 
-                console.log("Attempting to convert sheet to JSON.");
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true });
-                console.log("Sheet converted to JSON.", jsonData);
-
 
                 if (!jsonData || jsonData.length === 0) {
-                    console.log("JSON data is empty.");
-                     if (uploadStatus) {
-                        uploadStatus.textContent = 'Súbor je prázdny alebo neobsahuje žiadne dáta.';
-                        uploadStatus.style.color = 'orange';
-                     }
-                    resetApplicationState();
+                    uploadStatus.textContent = 'Súbor je prázdny alebo neobsahuje žiadne dáta.';
+                    uploadStatus.style.color = 'orange';
+                    resetApplicationState(); // Vráti do ručného módu
                     return;
                 }
 
@@ -314,76 +214,59 @@ document.addEventListener('DOMContentLoaded', () => {
                       fileHeaders = jsonData[0].map((_, i) => `Stĺpec ${i + 1}`);
                       fileData = jsonData;
                  }
-                 console.log("Detected headers:", fileHeaders);
-                 console.log("Extracted file data:", fileData);
-
 
                  if (fileData.length === 0) {
-                      console.log("No data rows found after header check.");
-                      if (uploadStatus) {
-                        uploadStatus.textContent = 'Súbor neobsahuje žiadne riadky dát.';
-                        uploadStatus.style.color = 'orange';
-                      }
-                    resetApplicationState();
-                    return;
+                     uploadStatus.textContent = 'Súbor neobsahuje žiadne riadky dát.';
+                     uploadStatus.style.color = 'orange';
+                     resetApplicationState(); // Vráti do ručného módu
+                     return;
                  }
 
                  // Prepnutie do režimu súboru
                  isManualInputMode = false;
                  rawFileData = fileData;
-                 const columnHeaders = fileHeaders;
+                 const columnHeaders = fileHeaders; // Použiť hlavičky zo súboru
 
-                 if (uploadStatus) {
-                    uploadStatus.textContent = `Súbor ${fileName} úspešne načítaný. ${rawFileData.length} riadkov dát.`;
-                    uploadStatus.style.color = 'green';
-                 }
-
+                 uploadStatus.textContent = `Súbor ${fileName} úspešne načítaný. ${rawFileData.length} riadkov dát.`;
+                 uploadStatus.style.color = 'green';
 
                 // Zobraziť všetky sekcie (už sú zobrazené v ručnom móde)
-                // Kontrola, či elementy existujú pred nastavením display
-                if (dataSection) dataSection.style.display = 'block';
-                if (settingsSection) settingsSection.style.display = 'block';
-                if (graphSection) graphSection.style.display = 'block';
-                if (exportSection) exportSection.style.display = 'block';
-
+                dataSection.style.display = 'block';
+                settingsSection.style.display = 'block';
+                graphSection.style.display = 'block';
+                exportSection.style.display = 'block';
 
                  // Skryť tlačidlá pre správu riadkov v režime súboru
-                 if (addRowBtn) addRowBtn.style.display = 'none';
-                 if (removeRowBtn) removeRowBtn.style.display = 'none';
+                 addRowBtn.style.display = 'none';
+                 removeRowBtn.style.display = 'none';
 
                  // Zobraziť dáta v tabuľke a nastaviť mapovanie stĺpcov zo súboru
-                 if (dataTable) renderDataTable(rawFileData, columnHeaders);
-                 if (sourceColumnSelect) populateColumnSelects(columnHeaders); // Selecty sa naplnia hlavičkami zo súboru
+                 renderDataTable(rawFileData, columnHeaders);
+                 populateColumnSelects(columnHeaders); // Selecty sa naplnia hlavičkami zo súboru
                 // Graf sa vykreslí automaticky po populateColumnSelects ak sú vybrané/predvyplnené
 
             } catch (e) {
-                console.error(`Error processing file: ${e.message}`, e);
-                 if (uploadStatus) {
-                    uploadStatus.textContent = `Chyba pri spracovaní súboru: ${e.message}`;
-                    uploadStatus.style.color = 'red';
-                 }
-                 if (fileInput) event.target.value = null;
+                uploadStatus.textContent = `Chyba pri spracovaní súboru: ${e.message}`;
+                uploadStatus.style.color = 'red';
+                console.error("Chyba pri spracovaní súboru:", e);
+                event.target.value = null; // Reset inputu súboru
                 resetApplicationState(); // Vráti do ručného módu
             }
         };
 
         reader.onerror = function(e) {
-            console.error("FileReader onerror triggered.", e);
-             if (uploadStatus) {
-                uploadStatus.textContent = 'Chyba pri čítaní súboru.';
-                uploadStatus.style.color = 'red';
-             }
-             if (fileInput) event.target.value = null;
+            uploadStatus.textContent = 'Chyba pri čítaní súboru.';
+            uploadStatus.style.color = 'red';
+            console.error("Chyba pri čítaní súboru:", e);
+            event.target.value = null; // Reset inputu súboru
             resetApplicationState(); // Vráti do ručného módu
         };
 
-        reader.readAsArrayBuffer(file); // Použiť ArrayBuffer pre SheetJS
-        console.log("FileReader readAsArrayBuffer called.");
+        reader.readAsArrayBuffer(file);
     }
 
     // Vykreslí dáta v HTML tabuľke
     function renderDataTable(data, headers) {
-        if (!dataTable) { console.error("Data table element not found."); return; } // Kontrola
         const thead = dataTable.querySelector('thead');
         const tbody = dataTable.querySelector('tbody');
 
@@ -459,8 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Naplní selecty pre výber stĺpcov (rôzne pre ručný mód a súborový mód)
     function populateColumnSelects(headers) {
-         if (!sourceColumnSelect || !targetColumnSelect || !valueColumnSelect) { console.error("Column select elements not found."); return; } // Kontrola
-
          // Odstrániť existujúce poslucháče, aby sa nezdvojovali
          sourceColumnSelect.removeEventListener('change', handleColumnMappingChange);
          targetColumnSelect.removeEventListener('change', handleColumnMappingChange);
@@ -490,13 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Pri ručnom režime sú stĺpce fixné (0, 1, 2), selecty sú disabled
         if (isManualInputMode) {
-             // Selecty už sú disabled z initializeDataTableForManualInput, len nastaviť hodnoty
-            sourceColumnSelect.value = 0;
-            targetColumnSelect.value = 1;
-            valueColumnSelect.value = 2;
-             sourceColumnSelect.disabled = true; // Explicitne nastaviť disabled
-             targetColumnSelect.disabled = true;
-             valueColumnSelect.disabled = true;
+            sourceColumnSelect.disabled = true;
+            targetColumnSelect.disabled = true;
+            valueColumnSelect.disabled = true;
         } else {
              // V režime súboru selecty odblokovať a pridať poslucháčov
              sourceColumnSelect.disabled = false;
@@ -535,57 +412,45 @@ document.addEventListener('DOMContentLoaded', () => {
               prepareSankeyDataAndDraw(); // Toto volá updateGraph
          } else {
               console.log("Čakám na výber všetkých stĺpcov pre graf.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = ''; // Vyčistiť kontajner grafu
-              if (graphTooltip) graphTooltip.style.display = 'none'; // Skryť tooltip
+              sankeyGraphContainer.innerHTML = ''; // Vyčistiť kontajner grafu
+              graphTooltip.style.display = 'none'; // Skryť tooltip
          }
     }
 
     // Handler pre zmenu výberu stĺpcov (volá sa len v režime súboru)
     function handleColumnMappingChange() {
-         // Táto funkcia sa volá len pri zmene selectov, čo sa v ručnom režime nedeje (sú disabled)
-         // Volá sa po populateColumnSelects v režime súboru, alebo na začiatku init
-         if (sourceColumnSelect && sourceColumnSelect.value !== "" && targetColumnSelect && targetColumnSelect.value !== "" && valueColumnSelect && valueColumnSelect.value !== "") {
+         if (sourceColumnSelect.value !== "" && targetColumnSelect.value !== "" && valueColumnSelect.value !== "") {
               console.log("Všetky stĺpce pre graf boli vybrané. Pripravujem dáta a vykresľujem graf.");
               prepareSankeyDataAndDraw();
          } else {
               console.log("Čakám na výber všetkých stĺpcov pre graf.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-              if (graphTooltip) graphTooltip.style.display = 'none';
+              sankeyGraphContainer.innerHTML = '';
+              graphTooltip.style.display = 'none';
          }
     }
 
     // Pripraví dáta pre D3 Sankey layout a zavolá updateGraph
     function prepareSankeyDataAndDraw() {
-         // Kontrolujeme, či sú selecty k dispozícii predtým ako k nim pristupujeme
-         const sourceIndex = isManualInputMode && sourceColumnSelect ? 0 : (sourceColumnSelect ? parseInt(sourceColumnSelect.value) : NaN);
-         const targetIndex = isManualInputMode && targetColumnSelect ? 1 : (targetColumnSelect ? parseInt(targetColumnSelect.value) : NaN);
-         const valueIndex = isManualInputMode && valueColumnSelect ? 2 : (valueColumnSelect ? parseInt(valueColumnSelect.value) : NaN);
-
+         const sourceIndex = isManualInputMode ? 0 : parseInt(sourceColumnSelect.value);
+         const targetIndex = isManualInputMode ? 1 : parseInt(targetColumnSelect.value);
+         const valueIndex = isManualInputMode ? 2 : parseInt(valueColumnSelect.value);
 
          if (isNaN(sourceIndex) || isNaN(targetIndex) || isNaN(valueIndex)) {
               console.error("Nevalidné indexy stĺpcov pre Sankey.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-              if (graphTooltip) graphTooltip.style.display = 'none';
+              sankeyGraphContainer.innerHTML = '';
+              graphTooltip.style.display = 'none';
               return;
          }
 
          const links = [];
          const nodesMap = new Map(); // Na sledovanie unikátnych uzlov
 
-         if (!rawFileData) { // Ak nie sú dáta, vrátiť sa
-              console.log("rawFileData is null, cannot prepare Sankey data.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-              if (graphTooltip) graphTooltip.style.display = 'none';
-              return;
-         }
-
-
          rawFileData.forEach((row, rowIndex) => {
              // Zabezpečiť, že stĺpec existuje v riadku pre daný index
-             const sourceVal = (row && row[sourceIndex] !== null && row[sourceIndex] !== undefined) ? String(row[sourceIndex]).trim() : '';
-             const targetVal = (row && row[targetIndex] !== null && row[targetIndex] !== undefined) ? String(row[targetIndex]).trim() : '';
+             const sourceVal = (row[sourceIndex] !== null && row[sourceIndex] !== undefined) ? String(row[sourceIndex]).trim() : '';
+             const targetVal = (row[targetIndex] !== null && row[targetIndex] !== undefined) ? String(row[targetIndex]).trim() : '';
              // parseFloat ignoruje text za číslom, čím umožňuje zadávať napr. "100 Eur"
-             const valueRaw = (row && row[valueIndex] !== null && row[valueIndex] !== undefined) ? String(row[valueIndex]).trim().replace(',', '.') : '';
+             const valueRaw = (row[valueIndex] !== null && row[valueIndex] !== undefined) ? String(row[valueIndex]).trim().replace(',', '.') : '';
              const valueVal = parseFloat(valueRaw);
 
 
@@ -611,8 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
           if (nodesMap.size === 0 || links.length === 0) {
               console.log("Žiadne platné dáta pre vytvorenie Sankey grafu po filtrovaní.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-              if (graphTooltip) graphTooltip.style.display = 'none';
+              sankeyGraphContainer.innerHTML = '';
+              graphTooltip.style.display = 'none';
               return;
          }
 
@@ -630,25 +495,16 @@ document.addEventListener('DOMContentLoaded', () => {
                    console.warn(`Počet unikátnych uzlov (${domainNames.length}) prekračuje počet farieb v schéme (${colorScheme.length}). Niektoré uzly budú mať rovnakú farbu.`);
                }
 
-              // Skontrolujeme, či d3.scaleOrdinal existuje
-              if (typeof d3.scaleOrdinal === 'function') {
-                   nodeColorScale = d3.scaleOrdinal(colorScheme).domain(domainNames);
+              nodeColorScale = d3.scaleOrdinal(colorScheme).domain(domainNames);
 
-                   // Priradíme farbu každému uzlu
-                   nodes.forEach(node => {
-                        if (domainNames.includes(node.name)) {
-                            node.color = nodeColorScale(node.name);
-                        } else {
-                            node.color = graphSettings.nodeColor; // Fallback farba pre uzly, ktoré nie sú v linkoch (ak také existujú)
-                        }
-                   });
-              } else {
-                   console.error("D3.js modul scaleOrdinal (potrebný pre farbenie podľa zdroja) nie je načítaný alebo nie je funkcia.");
-                   nodeColorScale = null; // Zabezpečiť null, ak škála nefunguje
-                    // V tomto prípade nepriradíme dynamické farby uzlom
-                    nodes.forEach(node => { delete node.color; });
-              }
-
+              // Priradíme farbu každému uzlu
+              nodes.forEach(node => {
+                   if (domainNames.includes(node.name)) {
+                       node.color = nodeColorScale(node.name);
+                   } else {
+                       node.color = graphSettings.nodeColor; // Fallback farba pre uzly, ktoré nie sú v linkoch (ak také existujú)
+                   }
+              });
 
          } else {
              // Ak sa nefarbí dynamicky, škálu vynulujeme a z uzlov odstránime pridanú farbu
@@ -669,13 +525,13 @@ document.addEventListener('DOMContentLoaded', () => {
                  link.target = targetNode; // Odkaz na objekt uzla
               } else {
                    // Ak by náhodou uzol nebol nájdený (nemalo by sa stať)
-                   link.source = null; // Použijeme null namiesto -1 pre objekty
-                   link.target = null;
+                   link.source = -1;
+                   link.target = -1;
               }
          });
 
-        // Filter pre istotu, ak by sa dostali neplatné linky (s null source/target)
-         const validLinks = links.filter(link => link.source !== null && link.target !== null);
+        // Filter pre istotu, ak by sa dostali neplatné linky
+         const validLinks = links.filter(link => typeof link.source === 'object' && typeof link.target === 'object');
 
 
          const sankeyData = { nodes: nodes, links: validLinks };
@@ -689,36 +545,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Vykreslí alebo aktualizuje Sankey graf pomocou D3.js
     function updateGraph(sankeyData) {
          // Kontrola, či sú kľúčové knižnice pre vykreslenie grafu načítané
-         if (typeof d3 === 'undefined' || typeof d3.sankey !== 'function') {
-             console.error("Knihovna D3.js nebo její Sankey modul není načten/funkční. Nelze vykreslit graf.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = "Chyba pri načítaní knižnice D3.js Sankey.";
-              if (graphTooltip) graphTooltip.style.display = 'none';
+         if (typeof d3 === 'undefined' || typeof d3.sankey === 'undefined') {
+             console.error("Knihovna D3.js nebo její Sankey modul není načten.");
+              sankeyGraphContainer.innerHTML = "Chyba pri načítaní knižnice D3.js Sankey.";
+              graphTooltip.style.display = 'none';
              return;
          }
 
         if (!sankeyData || !sankeyData.nodes || !sankeyData.links || sankeyData.nodes.length === 0 || sankeyData.links.length === 0) {
-             console.log("Žiadne dáta pre graf alebo dáta sú prázdne po filtrovaní.");
-             if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-             if (graphTooltip) graphTooltip.style.display = 'none'; // Skryť tooltip, ak bol zobrazený
+             console.log("Dáta pre graf nie sú k dispozícii alebo sú prázdne po príprave.");
+             sankeyGraphContainer.innerHTML = '';
+              graphTooltip.style.display = 'none'; // Skryť tooltip, ak bol zobrazený
              return;
          }
 
         console.log("Vykresľujem/aktualizujem graf s nastaveniami:", graphSettings);
 
-        const { width, height, nodeWidth, nodePadding, linkColorMode, solidLinkColor, linkOpacity, nodeColor, showNodeLabels, showNodeValues, colorNodesBySource, labelFontSize, labelFontFamily, labelColor } = graphSettings;
+        const { width, height, nodeWidth, nodePadding, linkColorMode, solidLinkColor, linkOpacity, nodeColor, showNodeLabels, showNodeValues, colorNodesBySource, labelFontSize, labelFontFamily, labelColor } = graphSettings; // Rozbalenie aj nových nastavení
 
 
         // Vyčistiť predchádzajúci graf a skryť tooltip
-        if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-        if (graphTooltip) graphTooltip.style.display = 'none'; // Skryť tooltip pri každom prekreslení
+        sankeyGraphContainer.innerHTML = '';
+        graphTooltip.style.display = 'none'; // Skryť tooltip pri každom prekreslení
 
 
-        // Vytvorenie SVG elementu v kontajneri
-        const svg = d3.select(sankeyGraphContainer).append("svg")
+        const svg = d3.select("#sankeyGraphContainer")
+                      .append("svg")
                       .attr("width", width)
                       .attr("height", height);
 
-        // Vytvorenie Sankey layoutu
         const sankey = d3.sankey()
                          .nodeWidth(nodeWidth)
                          .nodePadding(nodePadding)
@@ -726,15 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // Spustiť layout - modifikuje sankeyData.nodes a sankeyData.links, pridá súradnice atď.
-        // Skontrolujeme, či sankey je funkcia
-        if (typeof sankey === 'function') {
-            sankey(sankeyData);
-        } else {
-             console.error("D3 Sankey layout objekt nie je funkčný.");
-              if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = "Chyba: D3 Sankey layout zlyhal.";
-             return;
-        }
-
+        sankey(sankeyData);
 
         // --- Vykreslenie Linkov (s tooltipami) ---
         const link = svg.append("g")
@@ -753,26 +600,23 @@ document.addEventListener('DOMContentLoaded', () => {
             link.attr("stroke", solidLinkColor); // Jednotná farba z nastavení
         } else if (linkColorMode === 'bySourceNode') {
             // Farba linky podľa farby zdrojového uzla (priradená v prepareSankeyDataAndDraw)
-            // Použiť priradenú farbu uzla (d.source.color), fallback na jednotnú farbu linky ak chýba
-             link.attr("stroke", d => d.source.color || solidLinkColor);
+             link.attr("stroke", d => d.source.color || solidLinkColor); // Použiť priradenú farbu uzla, fallback na jednotnú
         }
         // TODO: Pridať ďalšie režimy farbenia liniek
 
          // --- Pridanie Event Listenerov pre Tooltip na Linky ---
-         if (graphTooltip) { // Kontrola, či tooltip element existuje
-             link.on("mouseover", function(event, d) {
-                 graphTooltip.style.display = 'block'; // Zobraziť tooltip
-                 const formattedValue = Number.isInteger(d.value) ? d.value : d3.format(".1f")(d.value);
-                 graphTooltip.innerHTML = `<strong>${d.source.name}</strong> &rarr; <strong>${d.target.name}</strong><br>Hodnota: ${formattedValue}`;
-             })
-             .on("mousemove", function(event) {
-                 graphTooltip.style.left = (event.pageX + 15) + 'px';
-                 graphTooltip.style.top = (event.pageY + 15) + 'px';
-             })
-             .on("mouseleave", function() {
-                 graphTooltip.style.display = 'none';
-             });
-         }
+         link.on("mouseover", function(event, d) {
+             graphTooltip.style.display = 'block'; // Zobraziť tooltip
+             const formattedValue = Number.isInteger(d.value) ? d.value : d3.format(".1f")(d.value);
+             graphTooltip.innerHTML = `<strong>${d.source.name}</strong> &rarr; <strong>${d.target.name}</strong><br>Hodnota: ${formattedValue}`;
+         })
+         .on("mousemove", function(event) {
+             graphTooltip.style.left = (event.pageX + 15) + 'px';
+             graphTooltip.style.top = (event.pageY + 15) + 'px';
+         })
+         .on("mouseleave", function() {
+             graphTooltip.style.display = 'none';
+         });
 
 
         // --- Vykreslenie Uzlov (s tooltipami a dragom) ---
@@ -790,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Nastaviť farbu uzla na základe nastavení
         if (colorNodesBySource && linkColorMode === 'bySourceNode') {
              // Ak chceme farbiť uzly podľa farby zdroja liniek (a režim liniek je podľa zdroja)
-             // Použiť priradenú farbu uzla (d.color), fallback na jednotnú farbu uzla ak chýba
+             // Použiť priradenú farbu uzla, fallback na jednotnú farbu uzla
             node.attr("fill", d => d.color || nodeColor);
         } else {
             // Inak použiť jednotnú farbu uzla z nastavení
@@ -798,13 +642,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- Pridanie D3 Drag Behavior k Uzlom ---
-        // Skontrolujeme, či je modul D3 Drag načítaný a funkcia existuje
-        if (typeof d3.drag === 'function') {
+        // Skontrolujeme, či je modul D3 Drag načítaný
+        if (typeof d3.drag !== 'undefined') {
              node.call(d3.drag()
                  .subject(d => d) // Určí, ktorý dátový objekt je ťahaný (samotný uzol d)
                  .on("start", function(event, d) {
                       d3.select(this).raise(); // Presunie ťahaný element na vrch SVG
-                      if (graphTooltip) graphTooltip.style.display = 'none'; // Pri začiatku dragu skryť tooltip
+                      graphTooltip.style.display = 'none'; // Pri začiatku dragu skryť tooltip
                  })
                  .on("drag", function(event, d) {
                      // V Sankey typicky obmedzujeme ťahanie len vertikálne
@@ -818,15 +662,10 @@ document.addEventListener('DOMContentLoaded', () => {
                      d.y1 = d.y0 + nodeHeight;
 
                      // Informovať Sankey layout, aby prepočítal linky pripojené k ťahanému uzlu
-                     // Skontrolujeme, či metóda update existuje
-                     if (sankey && typeof sankey.update === 'function') {
-                         sankey.update(sankeyData);
-                          // Aktualizovať "d" atribút (cestu) všetkých liniek
-                          svg.selectAll(".links path").attr("d", d3.sankeyLinkHorizontal());
-                     } else {
-                          console.error("D3 Sankey update metóda nie je dostupná.");
-                     }
+                     sankey.update(sankeyData);
 
+                     // Aktualizovať "d" atribút (cestu) všetkých liniek
+                     svg.selectAll(".links path").attr("d", d3.sankeyLinkHorizontal());
 
                      // Aktualizovať pozíciu popisku uzla
                       svg.selectAll(".labels text")
@@ -847,23 +686,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
          // --- Pridanie Event Listenerov pre Tooltip na Uzly ---
-         if (graphTooltip) { // Kontrola, či tooltip element existuje
-             node.on("mouseover", function(event, d) {
-                 graphTooltip.style.display = 'block';
-                  const formattedValue = Number.isInteger(d.value) ? d.value : d3.format(".1f")(d.value);
-                 graphTooltip.innerHTML = `<strong>${d.name}</strong><br>Hodnota: ${formattedValue}`;
-             })
-             .on("mousemove", function(event) {
-                  graphTooltip.style.left = (event.pageX + 15) + 'px';
-                 graphTooltip.style.top = (event.pageY + 15) + 'px';
-             })
-             .on("mouseleave", function() {
-                 graphTooltip.style.display = 'none';
-             });
-         }
+         node.on("mouseover", function(event, d) {
+             graphTooltip.style.display = 'block';
+              const formattedValue = Number.isInteger(d.value) ? d.value : d3.format(".1f")(d.value);
+             graphTooltip.innerHTML = `<strong>${d.name}</strong><br>Hodnota: ${formattedValue}`;
+         })
+         .on("mousemove", function(event) {
+              graphTooltip.style.left = (event.pageX + 15) + 'px';
+             graphTooltip.style.top = (event.pageY + 15) + 'px';
+         })
+         .on("mouseleave", function() {
+             graphTooltip.style.display = 'none';
+         });
 
 
-         // --- Vykreslenie Textových Popisov k Uzlom (použitie nastavení fontu) ---
+         // --- Pridanie Textových Popisov k Uzlom (použitie nastavení fontu) ---
          const labelsGroup = svg.append("g")
                             .attr("class", "labels") // CSS trieda pre štýlovanie
                             .style("display", showNodeLabels ? "block" : "none"); // Zobraziť/skryť podľa nastavenia
@@ -901,66 +738,63 @@ document.addEventListener('DOMContentLoaded', () => {
         // Pridať nový prázdny riadok do dát
         rawFileData.push(['', '', '']);
         // Prekresliť tabuľku s fixnými hlavičkami pre ručný mód
-        if (dataTable) renderDataTable(rawFileData, manualColumnHeaders);
+        renderDataTable(rawFileData, manualColumnHeaders);
         console.log("Riadok pridaný. Počet riadkov:", rawFileData.length);
          // Prekresliť graf, lebo pribudol riadok dát
          prepareSankeyDataAndDraw();
     }
 
     function removeRow() {
-        if (rawFileData && rawFileData.length > 1) { // Zabezpečiť, aby ostal aspoň jeden riadok
+        if (rawFileData.length > 1) { // Zabezpečiť, aby ostal aspoň jeden riadok
             // Odstrániť posledný riadok z dát
             rawFileData.pop();
             // Prekresliť tabuľku
-            if (dataTable) renderDataTable(rawFileData, manualColumnHeaders);
+            renderDataTable(rawFileData, manualColumnHeaders);
              console.log("Posledný riadok odstránený. Počet riadkov:", rawFileData.length);
              // Prekresliť graf, lebo ubudol riadok dát
              prepareSankeyDataAndDraw();
         } else {
-             console.log("Nemôžem odstrániť posledný riadok. Musí zostať aspoň jeden.");
+             console.log("Nemôžem odstrániť posledný riadok.");
         }
     }
 
     // Funkcie pre export grafu (SVG, PNG, JPG)
     function exportSVG() {
-        const svgElement = sankeyGraphContainer ? sankeyGraphContainer.querySelector('svg') : null;
+        const svgElement = sankeyGraphContainer.querySelector('svg');
         if (!svgElement) {
-            console.error("SVG graf nebol nájdený pre export.");
+            console.error("SVG graf nebol nájdený.");
             return;
         }
         const svgString = new XMLSerializer().serializeToString(svgElement);
         const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
 
-        if (typeof saveAs === 'function') {
+        if (typeof saveAs !== 'undefined') {
             saveAs(blob, 'sankey_graph.svg');
             console.log("SVG graf exportovaný.");
         } else {
-            console.error("FileSaver.js nie je načítaný alebo nie je funkcia. Export nie je možný.");
-             // Alternatíva na stiahnutie bez FileSaver (nemusí fungovať všade ideálne)
+            console.error("FileSaver.js nie je načítaný. Export nie je možný.");
              const link = document.createElement('a');
              link.href = URL.createObjectURL(blob);
              link.download = 'sankey_graph.svg';
-             document.body.appendChild(link); // Potrebné pridať do DOM pre .click() v niektorých prehliadačoch
              link.click();
-             document.body.removeChild(link); // Odstrániť element
-             URL.revokeObjectURL(link.href); // Uvoľniť URL objekt
+             URL.revokeObjectURL(link.href);
         }
     }
 
     // Pomocná funkcia na export do PNG/JPG cez Canvas
     function exportCanvas(format = 'png') {
-        const svgElement = sankeyGraphContainer ? sankeyGraphContainer.querySelector('svg') : null;
+        const svgElement = sankeyGraphContainer.querySelector('svg');
          if (!svgElement) {
             console.error("SVG graf nebol nájdený pre export do Canvas.");
             return;
         }
-         if (typeof saveAs !== 'function') {
-             console.error("FileSaver.js nie je načítaný alebo nie je funkcia. Export nie je možný.");
+         if (typeof saveAs === 'undefined') {
+             console.error("FileSaver.js nie je načítaný. Export nie je možný.");
              return;
          }
 
-        const width = parseInt(svgElement.getAttribute('width')) || (graphSettings ? graphSettings.width : 960);
-        const height = parseInt(svgElement.getAttribute('height')) || (graphSettings ? graphSettings.height : 600);
+        const width = parseInt(svgElement.getAttribute('width')) || graphSettings.width;
+        const height = parseInt(svgElement.getAttribute('height')) || graphSettings.height;
 
         let svgString = new XMLSerializer().serializeToString(svgElement);
         // Ošetrenie špeciálnych znakov pre data URL
@@ -986,20 +820,11 @@ document.addEventListener('DOMContentLoaded', () => {
             context.drawImage(img, 0, 0, width, height);
 
             // Konvertovať Canvas na Blob v požadovanom formáte
-            // Kontrola existencie canvas.toBlob
-            if (typeof canvas.toBlob === 'function') {
-                canvas.toBlob(function(blob) {
-                    const fileName = `sankey_graph.${format}`;
-                    saveAs(blob, fileName);
-                     console.log(`${format.toUpperCase()} graf exportovaný.`);
-                }, `image/${format}`, 0.95); // MIME typ a kvalita pre JPG (0-1)
-            } else {
-                 console.error("canvas.toBlob method not available. Cannot export to PNG/JPG.");
-                 if (uploadStatus) {
-                     uploadStatus.textContent = `Chyba: Váš prehliadač nepodporuje export do ${format.toUpperCase()}.`;
-                     uploadStatus.style.color = 'red';
-                 }
-            }
+            canvas.toBlob(function(blob) {
+                const fileName = `sankey_graph.${format}`;
+                saveAs(blob, fileName);
+                 console.log(`${format.toUpperCase()} graf exportovaný.`);
+            }, `image/${format}`, 0.95); // MIME typ a kvalita pre JPG (0-1)
         };
 
         img.onerror = function(error) {
@@ -1013,30 +838,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetApplicationState() {
         // Sekcie dát, nastavení, grafu a exportu zostanú viditeľné
 
-        if (dataTable) {
-             dataTable.querySelector('thead').innerHTML = '';
-             dataTable.querySelector('tbody').innerHTML = '';
-        }
+        dataTable.querySelector('thead').innerHTML = '';
+        dataTable.querySelector('tbody').innerHTML = '';
 
+        // Odstrániť existujúce poslucháče udalostí zo selectov
+        sourceColumnSelect.removeEventListener('change', handleColumnMappingChange);
+        targetColumnSelect.removeEventListener('change', handleColumnMappingChange);
+        valueColumnSelect.removeEventListener('change', handleColumnMappingChange);
 
-        // Odstrániť existujúce poslucháče udalostí zo selectov pred ich vyčistením/skrytím
-        if (sourceColumnSelect) sourceColumnSelect.removeEventListener('change', handleColumnMappingChange);
-        if (targetColumnSelect) targetColumnSelect.removeEventListener('change', handleColumnMappingChange);
-        if (valueColumnSelect) valueColumnSelect.removeEventListener('change', handleColumnMappingChange);
+        sourceColumnSelect.innerHTML = '';
+        targetColumnSelect.innerHTML = '';
+        valueColumnSelect.innerHTML = '';
 
-
-        if (sourceColumnSelect) sourceColumnSelect.innerHTML = '';
-        if (targetColumnSelect) targetColumnSelect.innerHTML = '';
-        if (valueColumnSelect) valueColumnSelect.innerHTML = '';
-
-        if (sankeyGraphContainer) sankeyGraphContainer.innerHTML = '';
-        if (graphTooltip) graphTooltip.style.display = 'none'; // Skryť tooltip
+        sankeyGraphContainer.innerHTML = '';
+        graphTooltip.style.display = 'none'; // Skryť tooltip
 
         // rawFileData sa nanovo inicializuje v initializeDataTableForManualInput
         rawFileData = null;
         // isManualInputMode sa nastaví na true v initializeDataTableForManualInput
 
-        if (uploadStatus) uploadStatus.textContent = '';
+        uploadStatus.textContent = '';
         nodeColorScale = null; // Vynulovať farebnú škálu
 
          // Resetovať nastavenia grafu UI na defaultné hodnoty v objekte A UI
@@ -1055,25 +876,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
      // Zablokuje/skryje časti UI, ak chýbajú kľúčové JS knižnice
      function disableGraphRelatedFeatures() {
-         if (settingsSection) settingsSection.style.display = 'none';
-         if (graphSection) graphSection.style.display = 'none';
-         if (exportSection) exportSection.style.display = 'none';
-
-         // Zablokovať aj inputy v nastaveniach, ak sú zobrazené, ale graf nefunguje
-         // Prípadne zobraziť overlay s chybovou správou
-         // Zatiaľ len skryjeme sekcie, čo je najjednoduchšie.
+         settingsSection.style.display = 'none';
+         graphSection.style.display = 'none';
+         exportSection.style.display = 'none';
+         // Tlačidlá správy riadkov a datová tabuľka zostanú viditeľné
      }
+
+// --- Define the new handler function ---
+function handleNodeLabelSettingChange() {
+    // Update graphSettings object based on UI (similar to handleSettingChange)
+    graphSettings.showNodeLabels = showNodeLabelsCheckbox.checked;
+    graphSettings.showNodeValues = showNodeValuesCheckbox.checked;
+    graphSettings.labelFontSize = parseInt(labelFontSizeInput.value) || 10;
+    graphSettings.labelFontFamily = labelFontFamilyInput.value || 'sans-serif';
+    graphSettings.labelColor = labelColorInput.value || '#000000';
+    console.log("Nastavenia popisov zmenené:", graphSettings);
+
+    // --- Update existing SVG labels directly ---
+    const svg = d3.select("#sankeyGraphContainer svg");
+    if (svg.empty()) {
+        console.log("SVG nenájdené pre aktualizáciu popisov.");
+        return; // No graph to update
+    }
+
+    const labelsGroup = svg.select(".labels");
+    if (labelsGroup.empty()) {
+        console.log("Skupina popisov (.labels) nenájdená.");
+        return; // Labels group doesn't exist
+    }
+
+    // Update visibility
+    labelsGroup.style("display", graphSettings.showNodeLabels ? "block" : "none");
+
+    // Update font styles
+    labelsGroup.attr("font-family", graphSettings.labelFontFamily)
+               .attr("font-size", `${graphSettings.labelFontSize}px`)
+               .attr("fill", graphSettings.labelColor);
+
+    // Update text content (if showNodeValues changed)
+    labelsGroup.selectAll("text")
+        .text(d => {
+            let text = d.name;
+            if (graphSettings.showNodeValues && d.value !== undefined) {
+                const formattedValue = Number.isInteger(d.value) ? d.value : d3.format(".1f")(d.value);
+                text += ` (${formattedValue})`;
+            }
+            return text;
+        });
+
+    console.log("Popisy v grafe aktualizované bez prekreslenia layoutu.");
+}
 
 
     // --- Kód vykonaný pri načítaní DOM ---
 
-    // Kontrola knižníc
+    // Kontrola knižníc a inicializácia UI na začiatku
     const isXlsxLoaded = typeof XLSX !== 'undefined';
     const isD3Loaded = typeof d3 !== 'undefined';
-    // Presnejšie kontroly pre D3 moduly a FileSaver
-    const isSankeyLoaded = isD3Loaded && typeof d3.sankey === 'function';
-    const isDragLoaded = isD3Loaded && typeof d3.drag === 'function';
-    const isFileSaverLoaded = typeof saveAs === 'function';
+    const isSankeyLoaded = typeof d3.sankey !== 'undefined';
+    const isDragLoaded = typeof d3.drag !== 'undefined';
+    const isFileSaverLoaded = typeof saveAs !== 'undefined';
 
      console.log("SheetJS (XLSX) loaded:", isXlsxLoaded);
      console.log("D3.js loaded:", isD3Loaded);
@@ -1082,83 +944,60 @@ document.addEventListener('DOMContentLoaded', () => {
      console.log("FileSaver.js loaded:", isFileSaverLoaded);
 
 
-    // Pridať event listener pre nahrávanie súboru HNEĎ PO ZÍSKANÍ REFERENCIE
-    // Tento listener by mal byť pridaný bez ohľadu na to, či sa ostatné knižnice načítali
-    if (fileInput) { // Kontrola pre istotu, či bol element nájdený
-         console.log('Attempting to add change listener to fileInput.');
-         fileInput.addEventListener('change', handleFileSelect);
-         console.log('Change listener added to fileInput.');
-         // Resetovať file input pri štarte, aby sa nespustil change event pri prvom kliku, ak už bol súbor predtým vybraný
-          fileInput.value = null;
-    } else {
-         console.error("File input element with ID 'fileInput' not found!");
-         if (uploadStatus) {
-            uploadStatus.textContent = "Chyba: HTML element pre nahrávanie súboru nebol nájdený.";
-            uploadStatus.style.color = 'red';
-         }
-    }
-
-
     if (!isXlsxLoaded || !isD3Loaded || !isSankeyLoaded || !isDragLoaded || !isFileSaverLoaded) {
        let errorMessage = "Chyba pri načítaní knižníc:";
-         if (!isXlsxLoaded) errorMessage += "\n- SheetJS (XLSX) - Nahrávanie súborov nebude funkčné";
-         if (!isD3Loaded) errorMessage += "\n- D3.js (základ) - Graf nebude funkčný";
-         if (!isSankeyLoaded) errorMessage += "\n- D3 Sankey modul - Graf nebude funkčný";
-         if (!isDragLoaded) errorMessage += "\n- D3 Drag modul - Ťahanie uzlov nebude funkčné";
-         if (!isFileSaverLoaded) errorMessage += "\n- FileSaver.js - Export nebude funkčný";
+         if (!isXlsxLoaded) errorMessage += "\n- SheetJS (XLSX)";
+         if (!isD3Loaded) errorMessage += "\n- D3.js (základ)";
+         if (!isSankeyLoaded) errorMessage += "\n- D3 Sankey modul";
+         if (!isDragLoaded) errorMessage += "\n- D3 Drag modul (Potrebný pre ťahanie uzlov)";
+         if (!isFileSaverLoaded) errorMessage += "\n- FileSaver.js (Potrebný pre export)";
         errorMessage += "\nSkontrolujte cestu k nim v index.html a uistite sa, že D3 build obsahuje potrebné moduly.";
 
 
-        if (uploadStatus) {
-             // Ak už je tam správa "Data sa zadávajú ručne", pridať chybu pod to
-            if (uploadStatus.textContent && uploadStatus.textContent.includes('Data sa zadávajú ručne')) {
-                uploadStatus.innerHTML += "<br>" + errorMessage.replace(/\n/g, "<br>"); // Použiť innerHTML pre zalomenie riadkov
-            } else {
-                 uploadStatus.textContent = errorMessage;
-            }
-            uploadStatus.style.color = 'red'; // Hlavná farba chyby
-        }
-
+        uploadStatus.textContent = errorMessage;
+        uploadStatus.style.color = 'red';
 
          disableGraphRelatedFeatures(); // Zablokovať grafické funkcie
-         initializeDataTableForManualInput(); // Zobraziť tabuľku pre ručné zadávanie (stále funkčné)
+         initializeDataTableForManualInput(); // Zobraziť tabuľku pre ručné zadávanie
 
     } else {
-         // Ak sú všetky knižnice načítané a funkčné
+         // Ak sú všetky knižnice načítané
          initializeSettingsUI(); // Inicializovať UI nastavení
 
          // Pridať event listenery na exportné tlačidlá a tlačidlá pre správu riadkov
-         if (exportSvgBtn) exportSvgBtn.addEventListener('click', exportSVG);
-         if (exportPngBtn) exportPngBtn.addEventListener('click', () => exportCanvas('png'));
-         if (exportJpgBtn) exportJpgBtn.addEventListener('click', () => exportCanvas('jpeg'));
-         if (addRowBtn) addRowBtn.addEventListener('click', addRow);
-         if (removeRowBtn) removeRowBtn.addEventListener('click', removeRow);
-
-         // Pridať event listenery pre zmenu nastavení grafu (odlíšené handlery)
-         if (graphWidthInput) graphWidthInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (graphHeightInput) graphHeightInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (nodeWidthInput) nodeWidthInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (nodePaddingInput) nodePaddingInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (nodeColorInput) nodeColorInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (linkColorModeSelect) linkColorModeSelect.addEventListener('change', handleLayoutOrColorSettingChange);
-         if (solidLinkColorInput) solidLinkColorInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (linkOpacityInput) linkOpacityInput.addEventListener('input', handleLayoutOrColorSettingChange);
-         if (colorNodesBySourceCheckbox) colorNodesBySourceCheckbox.addEventListener('change', handleLayoutOrColorSettingChange);
-
-         // Listenery pre nastavenia popiskov (volajú špeciálny handler)
-         if (showNodeLabelsCheckbox) showNodeLabelsCheckbox.addEventListener('change', handleNodeLabelSettingChange);
-         if (showNodeValuesCheckbox) showNodeValuesCheckbox.addEventListener('change', handleNodeLabelSettingChange);
-         if (labelFontSizeInput) labelFontSizeInput.addEventListener('input', handleNodeLabelSettingChange);
-         if (labelFontFamilyInput) labelFontFamilyInput.addEventListener('input', handleNodeLabelSettingChange);
-         if (labelColorInput) labelColorInput.addEventListener('input', handleNodeLabelSettingChange);
+         exportSvgBtn.addEventListener('click', exportSVG);
+         exportPngBtn.addEventListener('click', () => exportCanvas('png'));
+         exportJpgBtn.addEventListener('click', () => exportCanvas('jpeg'));
+         addRowBtn.addEventListener('click', addRow);
+         removeRowBtn.addEventListener('click', removeRow);
 
 
+         // Pridať event listenery pre zmenu nastavení grafu (tieto boli v minulom kóde mimo listenra, presunúť dnu)
+         graphWidthInput.addEventListener('input', handleSettingChange);
+         graphHeightInput.addEventListener('input', handleSettingChange);
+         nodeWidthInput.addEventListener('input', handleSettingChange);
+         nodePaddingInput.addEventListener('input', handleSettingChange);
+         nodeColorInput.addEventListener('input', handleSettingChange);
+         linkColorModeSelect.addEventListener('change', handleSettingChange);
+         solidLinkColorInput.addEventListener('input', handleSettingChange);
+         linkOpacityInput.addEventListener('input', handleSettingChange);
+         colorNodesBySourceCheckbox.addEventListener('change', handleSettingChange);
+         showNodeLabelsCheckbox.addEventListener('change', handleNodeLabelSettingChange);
+showNodeValuesCheckbox.addEventListener('change', handleNodeLabelSettingChange);
+labelFontSizeInput.addEventListener('input', handleNodeLabelSettingChange);
+labelFontFamilyInput.addEventListener('input', handleNodeLabelSettingChange);
+labelColorInput.addEventListener('input', handleNodeLabelSettingChange);
+        // Poznámka: Ak sa menia len vlastnosti textu, nemusíme volať prepareSankeyDataAndDraw, stačí updateGraph
+        // Urobme nový handler pre zmeny textových nastavení
+
+
+         // Inicializovať tabuľku pre ručné zadávanie dát
          initializeDataTableForManualInput();
          // Zobraziť sekcie grafu, nastavení a exportu
-          if (settingsSection) settingsSection.style.display = 'block';
-          if (graphSection) graphSection.style.display = 'block';
-          if (exportSection) exportSection.style.display = 'block';
-          // Prvotné vykreslenie grafu sa spustí z initializeDataTableForManualInput volaním populateColumnSelects -> prepareSankeyDataAndDraw
+          settingsSection.style.display = 'block';
+          graphSection.style.display = 'block';
+          exportSection.style.display = 'block';
+          // Prvotné vykreslenie grafu sa spustí z initializeDataTableForManualInput
     }
 
 }); // Koniec DOMContentLoaded listenera

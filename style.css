@@ -33,6 +33,22 @@ h3 {
     padding-bottom: 5px;
 }
 
+/* Language Switcher Style */
+#language-switcher {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+#language-switcher label {
+    margin-right: 10px;
+}
+
+#language-switcher select {
+     padding: 5px;
+     border-radius: 4px;
+     border: 1px solid #ccc;
+}
+
 /* Základné štýly pre sekcie a karty */
 section.card {
     background-color: #fff;
@@ -52,6 +68,12 @@ section.card {
     font-weight: bold;
     margin-top: 5px;
     min-height: 1.2em; /* Rezervovať miesto pre text */
+}
+
+.hint {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: 10px;
 }
 
 /* Štýly pre mapovanie stĺpcov */

@@ -1,150 +1,161 @@
 <!DOCTYPE html>
-<html lang="sk">
-<head>
+<html lang="en"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sankey Graph Generator</title>
+    <title data-translate="appTitle">Sankey Graph Generator</title>
     <link rel="stylesheet" href="style.css">
-    </head>
+</head>
 <body>
     <div class="container">
-        <h1>Sankey Graph Generator</h1>
+        <h1 data-translate="appTitle">Sankey Graph Generator</h1>
+
+        <div id="language-switcher">
+            <label for="langSelect">Language:</label>
+            <select id="langSelect">
+                <option value="en">English</option>
+                <option value="sk">Slovensky</option>
+            </select>
+        </div>
 
         <section id="upload-section" class="card">
-            <h2>1. Nahrať Dáta (CSV alebo XLSX)</h2>
+            <h2 data-translate="uploadSectionTitle">1. Upload Data (CSV or XLSX)</h2>
             <input type="file" id="fileInput" accept=".csv, .xlsx">
             <div id="uploadStatus"></div>
-            <p style="margin-top: 10px; font-size: 0.9em; color: #555;">Alebo zadajte dáta priamo nižšie do tabuľky.</p>
+            <p id="upload-hint" class="hint" data-translate="uploadHint">Or enter data directly into the table below.</p>
         </section>
 
         <section id="data-section" class="card">
-            <h2>2. Dáta a Mapovanie Stĺpcov</h2>
+            <h2 data-translate="dataSectionTitle">2. Data and Column Mapping</h2>
             <div id="columnMapping">
-                <h3>Mapovať stĺpce pre Sankey graf:</h3>
-                <label for="sourceColumnSelect">Zdroj (Source):</label>
+                <h3 data-translate="columnMappingTitle">Map columns for Sankey graph:</h3>
+                <label for="sourceColumnSelect" data-translate="sourceColumnLabel">Source:</label>
                 <select id="sourceColumnSelect"></select>
 
-                <label for="targetColumnSelect">Cieľ (Target):</label>
+                <label for="targetColumnSelect" data-translate="targetColumnLabel">Target:</label>
                 <select id="targetColumnSelect"></select>
 
-                <label for="valueColumnSelect">Hodnota (Value):</label>
+                <label for="valueColumnSelect" data-translate="valueColumnLabel">Hodnota (Value):</label>
                 <select id="valueColumnSelect"></select>
             </div>
             <div id="dataTableContainer">
-                <h3>Náčítané dáta:</h3>
+                <h3 data-translate="dataTableTitle">Loaded Data:</h3>
                 <table id="dataTable">
                     <thead></thead>
                     <tbody></tbody>
                 </table>
             </div>
              <div id="data-table-controls" style="margin-top: 10px;">
-                 <button id="addRowBtn">Pridať riadok</button>
-                 <button id="removeRowBtn">Odstrániť posledný riadok</button>
+                 <button id="addRowBtn" data-translate="addRowButton">Add Row</button>
+                 <button id="removeRowBtn" data-translate="removeRowButton">Remove Last Row</button>
              </div>
         </section>
 
         <section id="settings-section" class="card" style="display: none;">
-            <h2>3. Nastavenia Grafu</h2>
+            <h2 data-translate="settingsSectionTitle">3. Graph Settings</h2>
             <div id="graphSettings">
 
                 <div class="setting-group">
-                    <h3>Farby</h3>
+                    <h3 data-translate="settingsColorsTitle">Colors</h3>
                     <div>
-                        <label for="linkColorModeSelect">Farbenie liniek:</label>
+                        <label for="linkColorModeSelect" data-translate="linkColorModeLabel">Link Coloring:</label>
                         <select id="linkColorModeSelect">
-                            <option value="solid">Jednotná farba</option>
-                            <option value="bySourceNode">Podľa zdrojového uzla</option>
-                             </select>
+                            <option value="solid" data-translate="linkColorModeSolid">Solid Color</option>
+                            <option value="bySourceNode" data-translate="linkColorModeBySource">By Source Node</option>
+                        </select>
                     </div>
 
-                    <div id="solidLinkColorDiv" style="display: flex; align-items: center;"> <label for="solidLinkColorInput">Jednotná farba liniek:</label>
-                        <input type="color" id="solidLinkColorInput" value="#000000">
-                         <label for="linkOpacityInput" style="width: auto; margin-left: 15px; margin-right: 5px;">Opacita (0-1):</label> <input type="number" id="linkOpacityInput" value="0.5" min="0" max="1" step="0.05" style="max-width: 70px;"> </div>
+                    <div id="solidLinkColorDiv" style="display: flex; align-items: center;">
+                         <label for="solidLinkColorInput" data-translate="solidLinkColorLabel">Solid Link Color:</label>
+                         <input type="color" id="solidLinkColorInput" value="#000000">
+                         <label for="linkOpacityInput" style="width: auto; margin-left: 15px; margin-right: 5px;" data-translate="linkOpacityLabel">Opacity (0-1):</label>
+                         <input type="number" id="linkOpacityInput" value="0.5" min="0" max="1" step="0.05" style="max-width: 70px;">
+                    </div>
 
                     <div>
-                        <label for="nodeColorInput">Jednotná farba uzlov:</label>
+                        <label for="nodeColorInput" data-translate="nodeColorLabel">Solid Node Color:</label>
                         <input type="color" id="nodeColorInput" value="#4682B4">
                     </div>
 
                      <div>
-                        <label for="colorNodesBySourceCheckbox">Farbiť uzly podľa farby zdrojovej linky:</label>
+                        <label for="colorNodesBySourceCheckbox" data-translate="colorNodesBySourceLabel">Color Nodes by Source Link Color:</label>
                         <input type="checkbox" id="colorNodesBySourceCheckbox">
-                         <span style="font-size: 0.8em; color: #666;">(Funguje pri farbení liniek podľa zdroja)</span>
+                         <span class="hint" data-translate="colorNodesBySourceHint">(Works when coloring links by source)</span>
                     </div>
 
                  </div>
 
                 <div class="setting-group">
-                    <h3>Rozmery a Layout</h3>
+                    <h3 data-translate="settingsDimensionsTitle">Dimensions and Layout</h3>
                     <div>
-                        <label for="graphWidthInput">Šírka grafu:</label>
+                        <label for="graphWidthInput" data-translate="graphWidthLabel">Graph Width:</label>
                         <input type="number" id="graphWidthInput" value="960" min="100"> px
                     </div>
                     <div>
-                        <label for="graphHeightInput">Výška grafu:</label>
+                        <label for="graphHeightInput" data-translate="graphHeightLabel">Graph Height:</label>
                         <input type="number" id="graphHeightInput" value="600" min="100"> px
                     </div>
                     <div>
-                        <label for="nodeWidthInput">Šírka uzlov:</label>
+                        <label for="nodeWidthInput" data-translate="nodeWidthLabel">Node Width:</label>
                         <input type="number" id="nodeWidthInput" value="15" min="5"> px
                     </div>
                      <div>
-                        <label for="nodePaddingInput">Vertikálna medzera medzi uzlami:</label>
+                         <label for="nodePaddingInput" data-translate="nodePaddingLabel">Vertical Node Padding:</label>
                         <input type="number" id="nodePaddingInput" value="10" min="1"> px
                     </div>
-                     </div>
+                 </div>
 
                  <div class="setting-group">
-                     <h3>Popisky Textu</h3>
+                     <h3 data-translate="settingsLabelsTitle">Text Labels</h3>
                       <div>
-                        <label for="showNodeLabelsCheckbox">Zobraziť popisky uzlov:</label>
+                        <label for="showNodeLabelsCheckbox" data-translate="showNodeLabelsLabel">Show Node Labels:</label>
                         <input type="checkbox" id="showNodeLabelsCheckbox" checked>
                     </div>
                      <div>
-                        <label for="showNodeValuesCheckbox">Zobraziť hodnotu pri popisku:</label>
+                        <label for="showNodeValuesCheckbox" data-translate="showNodeValuesLabel">Show Value in Label:</label>
                         <input type="checkbox" id="showNodeValuesCheckbox">
-                    </div>
+                     </div>
                      <div>
-                         <label for="labelFontSizeInput">Veľkosť písma:</label>
+                         <label for="labelFontSizeInput" data-translate="labelFontSizeLabel">Font Size:</label>
                          <input type="number" id="labelFontSizeInput" value="10" min="5"> px
                      </div>
                      <div>
-                         <label for="labelFontFamilyInput">Typ písma:</label>
+                         <label for="labelFontFamilyInput" data-translate="labelFontFamilyLabel">Font Family:</label>
                          <input type="text" id="labelFontFamilyInput" value="sans-serif">
-                         </div>
+                     </div>
                      <div>
-                         <label for="labelColorInput">Farba písma:</label>
+                         <label for="labelColorInput" data-translate="labelColorLabel">Font Color:</label>
                          <input type="color" id="labelColorInput" value="#000000">
                      </div>
 
                  </div>
 
-                 <p style="font-size: 0.9em; color: #666;">Zmeny nastavení by sa mali prejaviť ihneď po zmene hodnoty.</p>
+                 <p class="hint" data-translate="settingsHint" style="font-size: 0.9em; color: #666;">Settings changes should apply immediately.</p>
 
             </div>
         </section>
 
          <section id="graph-section" class="card" style="display: none;">
-            <h2>4. Sankey Graf</h2>
+            <h2 data-translate="graphSectionTitle">4. Sankey Graph</h2>
             <div id="sankeyGraphContainer">
                  </div>
         </section>
 
          <section id="export-section" class="card" style="display: none;">
-            <h2>5. Export Grafu</h2>
-            <button id="exportSvgBtn">Export SVG</button>
-            <button id="exportPngBtn">Export PNG</button>
-            <button id="exportJpgBtn">Export JPG</button>
+            <h2 data-translate="exportSectionTitle">5. Export Graph</h2>
+            <button id="exportSvgBtn" data-translate="exportSvgButton">Export SVG</button>
+            <button id="exportPngBtn" data-translate="exportPngButton">Export PNG</button>
+            <button id="exportJpgBtn" data-translate="exportJpgButton">Export JPG</button>
         </section>
 
-    </div> <div id="graphTooltip" class="tooltip" style="display: none;"></div>
+    </div>
+    <div id="graphTooltip" class="tooltip" style="display: none;"></div>
 
     <script src="libs/xlsx.full.min.js"></script>
-
     <script src="libs/d3.min.js"></script>
+    <script src="libs/d3-sankey.min.js"></script>
+    <script src="libs/d3-drag.min.js"></script>
+    <script src="libs/FileSaver.min.js"></script>
 
-    <script src="libs/d3-sankey.min.js"></script> <script src="libs/d3-drag.min.js"></script> <script src="libs/FileSaver.min.js"></script>
-
-
-    <script src="script.js"></script> </body>
+    <script src="script.js"></script>
+</body>
 </html>
