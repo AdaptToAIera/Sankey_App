@@ -1,3 +1,5 @@
+/* style.css */
+
 body {
     font-family: sans-serif;
     line-height: 1.6;
@@ -8,156 +10,294 @@ body {
 }
 
 .container {
-    max-width: 1200px;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* Priestor medzi sekciami */
-}
-
-.card {
+    max-width: 1000px;
+    margin: 0 auto;
     background: #fff;
-    padding: 20px;
+    padding: 20px 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-h1, h2, h3 {
+h1, h2 {
     color: #0056b3;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
 }
 
+h3 {
+    color: #007bff;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* Základné štýly pre sekcie a karty */
+section.card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Štýly pre input súboru a status */
 #upload-section input[type="file"] {
-    display: block;
-    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
+#uploadStatus {
+    font-weight: bold;
+    margin-top: 5px;
+    min-height: 1.2em; /* Rezervovať miesto pre text */
+}
+
+/* Štýly pre mapovanie stĺpcov */
 #columnMapping label {
     margin-right: 10px;
     font-weight: bold;
 }
 
 #columnMapping select {
-    margin-right: 20px;
-    padding: 5px;
+    padding: 8px;
     border-radius: 4px;
     border: 1px solid #ccc;
+    margin-right: 20px;
+    margin-bottom: 15px;
 }
 
+/* Štýly pre data tabuľku */
 #dataTableContainer {
     margin-top: 20px;
-    max-height: 400px; /* Obmedzenie výšky pre scrollbar */
-    overflow-y: auto; /* Pridanie scrollbaru */
+    max-height: 400px; /* Obmedziť výšku tabuľky s možnosťou skrolovania */
+    overflow: auto; /* Pridať skrolovanie, ak je tabuľka príliš dlhá */
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 #dataTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+    width: 100%; /* Tabuľka zaberie celú šírku kontajnera */
+    border-collapse: collapse; /* Spojiť okraje buniek */
 }
 
-#dataTable th, #dataTable td {
+#dataTable th,
+#dataTable td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 8px 12px;
     text-align: left;
 }
 
 #dataTable th {
     background-color: #f2f2f2;
-    position: sticky; /* Hlavička zostane viditeľná pri scrollovaní */
+    font-weight: bold;
+    position: sticky; /* Hlavička zostane viditeľná pri skrolovaní */
     top: 0;
-    z-index: 1;
+    z-index: 2; /* Zabezpečiť, aby hlavička bola nad obsahom tabuľky pri skrolovaní */
+}
+
+#dataTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Striedavé farby riadkov */
 }
 
 #dataTable td[contenteditable="true"] {
-    background-color: #e9e9e9; /* Vizualne odlíšiť editovateľné bunky */
-    cursor: text;
+    background-color: #fff; /* Biela pozadie pre editovateľné bunky */
+    cursor: text; /* Kurzor textu */
+    min-width: 80px; /* Minimálna šírka bunky */
 }
 
-#sankeyGraphContainer {
-    width: 100%; /* Graf zatiaľ vyplní dostupnú šírku */
-    /* Výška bude nastavená JS na základe nastavení */
+#dataTable td[contenteditable="true"]:focus {
+    outline: 2px solid #007bff; /* Modré zvýraznenie pri editácii */
+    background-color: #e9f5ff; /* Svetlomodré pozadie pri editácii */
 }
 
-/* Základné štýly pre D3 SVG elementy (voliteľné, D3 často nastaví atribúty priamo) */
-#sankeyGraphContainer svg path {
-    fill: none;
-    stroke: #000;
-    stroke-opacity: 0.2;
+
+/* Štýly pre tlačidlá správy riadkov */
+#data-table-controls {
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
-#sankeyGraphContainer svg rect {
-    /* fill: steelblue; */
-    stroke: #000;
-}
-
-/* Alebo ak máte špecifickejšie pravidlo pre .nodes rect */
-.nodes rect {
-    /* fill: steelblue; <-- ZAKOMENTUJTE ALEBO ODSTRÁŇTE TENTO RIADOK */
-    stroke: #000;
-}
-
-#sankeyGraphContainer svg text {
-    font-size: 10px;
-    fill: #000;
-}
-
-#export-section button {
-    padding: 10px 15px;
+#data-table-controls button {
+    padding: 8px 12px;
     margin-right: 10px;
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    font-size: 1em;
+    font-size: 0.9em;
 }
 
-#export-section button:hover {
-    background-color: #0056b3;
+#data-table-controls button:hover {
+     background-color: #0056b3;
 }
 
-/* Pridať niekde do style.css, napr. na koniec */
-#solidLinkColorDiv:has(~ .setting-group div select#linkColorModeSelect option[value="bySourceNode"]:checked) {
-    display: none;
+#data-table-controls button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
-/* Alternatíva s JS: v JS budeme element #solidLinkColorDiv priamo skrývať/zobrazovať */
 
-/* Pridajme aj nejaký padding pre skupiny nastavení */
+
+/* Štýly pre skupiny nastavení */
+.setting-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.setting-group h3 {
+    margin-top: 0;
+    color: #007bff;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
 .setting-group div {
     margin-bottom: 10px;
-    /* Pridana uprava pre zarovnanie */
-    display: flex;
+    display: flex; /* Použiť flexbox pre zarovnanie labelov a inputov */
     align-items: center;
+    gap: 10px; /* Medzera medzi elementmi */
 }
 
 .setting-group label {
      display: inline-block;
-     width: 200px;
+     width: 220px; /* Konštantná šírka labelu pre zarovnanie */
      margin-right: 10px;
      font-weight: normal;
-     /* Pridana uprava pre zarovnanie */
-     flex-shrink: 0; /* Zabraňuje labelu zmensiť sa */
+     flex-shrink: 0; /* Zabraňuje labelu zmenšiť sa */
 }
 
-/* Uprava pre inputy v nastaveniach */
+/* Všeobecné štýly pre inputy v nastaveniach */
 .setting-group input[type="number"],
 .setting-group input[type="color"],
 .setting-group input[type="text"],
 .setting-group select {
-    padding: 5px;
+    padding: 8px; /* Zväčšiť padding pre lepšiu interakciu */
     border-radius: 4px;
     border: 1px solid #ccc;
-    /* Pridana uprava pre zarovnanie */
-    flex-grow: 1; /* Umožní inputu roztiahnuť sa */
-    max-width: 150px; /* Maximálna šírka inputu */
+    flex-grow: 1; /* Input sa môže roztiahnuť */
+    max-width: 180px; /* Všeobecná maximálna šírka inputu */
 }
-/* Checkboxu netreba full width */
+
+/* Špecifické úpravy šírky pre menšie inputy */
+#graphWidthInput,
+#graphHeightInput,
+#nodeWidthInput,
+#nodePaddingInput,
+#labelFontSizeInput {
+    max-width: 100px;
+}
+
+#linkOpacityInput {
+    max-width: 80px;
+}
+
+/* Textový input pre font family môže byť širší */
+#labelFontFamilyInput {
+    max-width: 250px;
+}
+
+/* Špecifický štýl pre label opacita, ak je na rovnakom riadku */
+#solidLinkColorDiv label[for="linkOpacityInput"] {
+     width: auto; /* Návrat na automatickú šírku */
+     margin-left: 15px;
+     margin-right: 5px;
+     flex-shrink: 0;
+}
+
+/* Checkboxu netreba flex grow ani max-width */
 .setting-group input[type="checkbox"] {
      flex-grow: 0;
      max-width: none;
-     width: auto; /* Vráti pôvodnú šírku */
+     width: auto;
+     margin-left: 0;
+     /* Prípadné vertikálne zarovnanie */
+     align-self: center;
 }
-/* Opacita inputu je menšia */
-#linkOpacityInput {
-    max-width: 70px;
+
+/* Textový popis pri checkboxoch */
+.setting-group div span {
+    font-size: 0.9em;
+    color: #666;
+     margin-left: 10px; /* Medzera od checkboxu */
+     flex-grow: 1;
+}
+
+
+/* Štýly pre kontajner grafu */
+#sankeyGraphContainer {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    background-color: #fff; /* Biele pozadie pre graf */
+    overflow: hidden; /* Ak by SVG presahoval kontajner */
+    border-radius: 4px;
+    text-align: center; /* Centruje SVG, ak je menšie ako kontajner */
+}
+
+/* Základné SVG elementy - väčšina štýlov sa nastavuje cez D3 atribúty */
+#sankeyGraphContainer svg {
+    display: block; /* Odstrániť extra medzeru pod SVG */
+    margin: 0 auto; /* Centruje SVG v kontajneri */
+}
+
+#sankeyGraphContainer svg rect {
+    /* fill: steelblue; <--- Toto by malo byť zakomentované alebo odstránené, aby D3 mohlo nastaviť farbu */
+    stroke: #000; /* Čierny okraj pre uzly */
+    stroke-width: 1px;
+}
+
+#sankeyGraphContainer svg path {
+    fill: none; /* Linky nemajú fill */
+    /* stroke a stroke-opacity sa nastavujú cez D3 atribúty */
+}
+
+#sankeyGraphContainer svg text {
+    /* font-family, font-size, fill, text-anchor sa nastavujú cez D3 atribúty */
+    pointer-events: none; /* Text neblokuje interakciu s uzlom pod ním */
+}
+
+
+/* Štýly pre tlačidlá exportu */
+#export-section button {
+     padding: 10px 15px;
+     margin-right: 15px;
+     background-color: #28a745; /* Zelená farba */
+     color: white;
+     border: none;
+     border-radius: 4px;
+     cursor: pointer;
+     font-size: 1em;
+}
+
+#export-section button:hover {
+    background-color: #218838;
+}
+
+#export-section button:disabled {
+     background-color: #ccc;
+     cursor: not-allowed;
+}
+
+
+/* Štýly pre Tooltip */
+.tooltip {
+    position: absolute; /* Aby sa dal tooltip polohovať vzhľadom na viewport */
+    text-align: center;
+    padding: 8px;
+    /* font-size a font-family by mali byť konzistentné s popiskami, alebo špecifické pre tooltip */
+    font: 12px sans-serif;
+    background: #333; /* Tmavé pozadie */
+    color: #fff;     /* Biele písmo */
+    border: 0px;
+    border-radius: 4px;
+    pointer-events: none; /* Aby tooltip neblokoval udalosti myši pod ním */
+    z-index: 1000; /* Aby bol tooltip nad všetkými ostatnými elementmi */
+    white-space: pre-wrap; /* Zachovať zalomenie riadkov pre \n */
+    opacity: 0.9; /* Mierna priesvitnosť */
+    transition: opacity 0.1s ease; /* Jemný prechod pri zobrazení/skrytí */
 }
